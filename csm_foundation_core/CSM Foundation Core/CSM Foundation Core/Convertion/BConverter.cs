@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CSM_Foundation.Convertion;
+using CSM_Foundation.Convertion;
+
+namespace CSM_Foundation_Core.Convertion;
 
 /// <summary>
 ///     [Abstraction] for serialization/deseralization custom converters.
@@ -45,7 +47,7 @@ public abstract class BConverter<TBase>
 
         if (wrongTypes.Any()) {
             throw new XBConverter(
-                    XBConverterSituations.InvalidVariations,
+                    XBConverterEvents.WRONG_VARIATIONS,
                     [.. wrongTypes]
                 );
         }
@@ -77,17 +79,17 @@ public abstract class BConverter<TBase>
         }
 
         if (string.IsNullOrWhiteSpace(discriminator)) {
-            throw new XBConverter(XBConverterSituations.NoDiscriminator);
+            throw new XBConverter(XBConverterEvents.NO_DISCRIMINATOR);
         }
 
         foreach (Type variation in Variations) {
             if (discriminator == variation.GetType().Name) {
-                return (TBase?)JsonSerializer.Deserialize(element, variation.GetType(), options);
+                return (TBase?)element.Deserialize(variation.GetType(), options);
             }
         }
 
         throw new XBConverter(
-                XBConverterSituations.NoVariation,
+                XBConverterEvents.NO_VARIATION,
                 discriminator: discriminator
             );
     }
@@ -106,7 +108,7 @@ public abstract class BConverter<TBase>
             }
         }
 
-        throw new XBConverter(XBConverterSituations.NoVariation);
+        throw new XBConverter(XBConverterEvents.NO_VARIATION);
     }
 
     #endregion

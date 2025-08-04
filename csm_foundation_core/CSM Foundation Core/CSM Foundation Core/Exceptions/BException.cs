@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Text.Json.Serialization;
-
-using CSM_Foundation.Core.Constants;
+﻿using System.Text.Json.Serialization;
 
 using CSM_Foundation_Core.Exceptions.Models;
 
@@ -119,7 +115,7 @@ public abstract class BException<TEvent>
     ///     </para>
     /// </summary>
     /// <returns></returns>
-    protected abstract Dictionary<TEvent, string> BuildAdviseContext();
+    protected virtual Dictionary<TEvent, string> BuildAdviseContext() => [];
 
     /// <summary>
     ///     Evaluates each advise configuration from <see cref="BuildAdviseContext"/> to determine based on the <see cref="Event"/> the advise to load.
@@ -130,7 +126,7 @@ public abstract class BException<TEvent>
     private string DetermineAdvise() {
         Dictionary<TEvent, string> advises = BuildAdviseContext();
 
-        string advise = AdvisesConstants.SERVER_CONTACT_ADVISE;
+        string advise = Constants.Messages.DEFAULT_USER_ADVISE;
         foreach (KeyValuePair<TEvent, string> possibleAdvise in advises) {
             if (Event.Equals(possibleAdvise.Key)) {
                 advise = possibleAdvise.Value;

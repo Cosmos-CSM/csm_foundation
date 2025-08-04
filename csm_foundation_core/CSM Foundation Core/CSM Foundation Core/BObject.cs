@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace CSM_Foundation.Core.Bases;
+namespace CSM_Foundation_Core;
 
 /// <summary>
 ///     Represents an inheritance link between datasource objects
@@ -10,27 +10,27 @@ namespace CSM_Foundation.Core.Bases;
 /// </summary>
 public abstract class BObject<TObject> {
 
-    public override bool Equals(object? Comparer) {
+    public override bool Equals(object? comparer) {
         PropertyInfo[] exceptions = [];
 
-        if (this is null && Comparer is null) {
+        if (this is null && comparer is null) {
             return true;
         }
 
-        if (this is not null && Comparer is null) {
+        if (this is not null && comparer is null) {
             return false;
         }
 
-        if (this is null && Comparer is not null) {
+        if (this is null && comparer is not null) {
             return false;
         }
 
-        if (GetType() != Comparer?.GetType()) {
+        if (GetType() != comparer?.GetType()) {
             return false;
         }
 
         PropertyInfo[] rProperties = GetType().GetProperties();
-        PropertyInfo[] cProperties = Comparer.GetType().GetProperties();
+        PropertyInfo[] cProperties = comparer.GetType().GetProperties();
 
         for (int i = 0; i < rProperties.Length; i++) {
             PropertyInfo rProperty = rProperties[i];
@@ -49,7 +49,7 @@ public abstract class BObject<TObject> {
             }
 
             dynamic? rReferenceValue = rProperty.GetValue(this);
-            dynamic? cReferenceValue = cProperty.GetValue(Comparer);
+            dynamic? cReferenceValue = cProperty.GetValue(comparer);
 
             #region Specific struct types equality validations.
             bool ReferenceValuesNotNull = rReferenceValue != null && cReferenceValue != null;
@@ -76,6 +76,8 @@ public abstract class BObject<TObject> {
         }
         return true;
     }
+
+
     public override string ToString() {
         Dictionary<string, dynamic?> jsonReference = [];
         PropertyInfo[] propReferences = GetType().GetProperties();
@@ -115,6 +117,7 @@ public abstract class BObject<TObject> {
 
         return tracedProperty;
     }
+
     public TObject Clone() {
         Type ObjectType = typeof(TObject);
 
