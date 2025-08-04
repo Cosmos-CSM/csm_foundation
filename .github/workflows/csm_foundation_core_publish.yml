@@ -1,0 +1,41 @@
+name: Publish (CSM Foundation Core) Package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'csm_foundation/csm_foundation_core/CSM Foundation Core/**'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    if: github.event.head_commit.message != 'Initial commit'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 📦 Pack NuGet project
+        run: |
+          dotnet pack \
+            "csm_foundation/csm_foundation_core/CSM Foundation Core/CSM Foundation Core.csproj" \
+            --configuration Release \
+            --output ./nupkgs
+
+      - name: 📤 Push to GitHub Packages
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.PUBLISH_PAT }}
+        run: |
+          dotnet nuget push ./nupkgs/*.nupkg \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --skip-duplicate
