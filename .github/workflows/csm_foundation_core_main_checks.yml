@@ -1,4 +1,4 @@
-name: Main PR Checks
+name: Version Check (.csproj)
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
 jobs:
   check-version:
     runs-on: ubuntu-latest
-    if: github.base_ref == 'main'
+    if: github.base_ref == 'main' && github.head_ref == 'development'
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v3
@@ -19,14 +19,14 @@ jobs:
       - name: Get version from PR branch
         id: pr_version
         run: |
-          VERSION_PR=$(cat VERSION)
+          VERSION_PR=$(grep -oPm1 "(?<=<Version>)[^<]+" "csm_foundation\csm_foundation_core\CSM Foundation Core\CSM Foundation Core\CSM Foundation Core.csproj")
           echo "version_pr=$VERSION_PR" >> $GITHUB_OUTPUT
 
       - name: Get version from main branch
         id: main_version
         run: |
           git fetch origin main
-          VERSION_MAIN=$(git show origin/main:VERSION)
+          VERSION_MAIN=$(git show origin/main:path/to/YourProject.csproj | grep -oPm1 "(?<=<Version>)[^<]+")
           echo "version_main=$VERSION_MAIN" >> $GITHUB_OUTPUT
 
       - name: Compare versions
@@ -38,4 +38,3 @@ jobs:
             exit 1
           else
             echo "✅ Version updated."
-          fi
