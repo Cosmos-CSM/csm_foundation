@@ -1,4 +1,4 @@
-﻿namespace CSM_Foundation.Convertion;
+﻿namespace CSM_Foundation_Core.Convertion;
 
 
 /// <summary>
