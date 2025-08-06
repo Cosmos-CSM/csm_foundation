@@ -26,7 +26,7 @@ jobs:
         id: main_version
         run: |
           git fetch origin main
-          VERSION_MAIN=$(git show origin/main:path/to/YourProject.csproj | grep -oPm1 "(?<=<Version>)[^<]+")
+          VERSION_MAIN=$(git show origin/main:"csm_foundation\csm_foundation_core\CSM Foundation Core\CSM Foundation Core\CSM Foundation Core.csproj" | grep -oPm1 "(?<=<Version>)[^<]+")
           echo "version_main=$VERSION_MAIN" >> $GITHUB_OUTPUT
 
       - name: Compare versions
