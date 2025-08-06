@@ -1,0 +1,41 @@
+name: Main PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize]
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'main'
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get version from PR branch
+        id: pr_version
+        run: |
+          VERSION_PR=$(cat VERSION)
+          echo "version_pr=$VERSION_PR" >> $GITHUB_OUTPUT
+
+      - name: Get version from main branch
+        id: main_version
+        run: |
+          git fetch origin main
+          VERSION_MAIN=$(git show origin/main:VERSION)
+          echo "version_main=$VERSION_MAIN" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        run: |
+          echo "PR version: ${{ steps.pr_version.outputs.version_pr }}"
+          echo "Main version: ${{ steps.main_version.outputs.version_main }}"
+          if [ "${{ steps.pr_version.outputs.version_pr }}" == "${{ steps.main_version.outputs.version_main }}" ]; then
+            echo "❌ Version has not been updated!"
+            exit 1
+          else
+            echo "✅ Version updated."
+          fi
