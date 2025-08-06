@@ -1,7 +1,6 @@
-﻿using CSM_Foundation_Core.Convertion;
-using CSM_Foundation_Core.Exceptions;
+﻿using CSM_Foundation_Core.Exceptions;
 
-namespace CSM_Foundation.Convertion;
+namespace CSM_Foundation_Core.Convertion;
 
 /// <summary>
 ///     <see cref="XBConverter"/> Exception situations enumerator.
