@@ -10,9 +10,19 @@ namespace CSM_Foundation_Core.Exceptions;
 public interface IException {
 
     /// <summary>
+    ///     Exception message.
+    /// </summary>
+    string Message { get; }
+
+    /// <summary>
     ///     Exception main subject.
     /// </summary>
     string Subject { get; }
+
+    /// <summary>
+    ///     Exception stacking trace.
+    /// </summary>
+    string? StackTrace { get; }
 
     /// <summary>
     ///     An user friendly message, meant to be displayed instead of the complex framework exception messages.

@@ -1,4 +1,9 @@
-﻿using CSM_Foundation_Database.Entity.Bases;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+
+using CSM_Foundation_Core;
+
+using CSM_Foundation_Database.Entity.Bases;
 using CSM_Foundation_Database.Models;
 using CSM_Foundation_Database.Utilitites;
 
@@ -6,16 +11,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using System.ComponentModel.DataAnnotations;
-using System.Reflection;
-
 namespace CSM_Foundation.Database;
 
 /// <summary>
 ///     Represents a CSM Database, wich configures and handles data management along business entities and 
 ///     data persistence.
 /// </summary>
-public interface IDatabase { }
+public interface IDatabase {
+
+    /// <summary>
+    ///     Validates database connection and configuration health.
+    /// </summary>
+    void ValidateHealth();
+}
 
 /// <summary>
 ///     Represents a CSM Database, wich configures and handles data management along business entities and
@@ -26,20 +34,26 @@ public interface IDatabase { }
 /// </typeparam>
 public abstract partial class BDatabase<TDatabases>
     : DbContext, IDatabase
-    where TDatabases : DbContext
-{
+    where TDatabases : DbContext {
 
     /// <summary>
-    ///     Data storage connection options.
+    ///     Whether the database context has logs enabled at building time.
+    /// </summary>
+    readonly bool LogsOn = true;
+
+    /// <summary>
+    ///     ORM Connection data.
     /// </summary>
     protected readonly ConnectionOptions Connection;
 
     /// <summary>
-    ///     [MaxLength 5] Server sign identificator (needed for transactions and authorization processes).
+    ///     Server sign identificator (needed for transactions and authorization processes).
     /// </summary>
+    /// <remarks>
+    ///     Must be strictly 5 char length
+    /// </remarks>
     [StringLength(5, MinimumLength = 5)]
-    protected string Sign
-    {
+    protected string Sign {
         get => _Sign; init => _Sign = value.ToUpper();
     }
     string _Sign = "";
@@ -48,78 +62,86 @@ public abstract partial class BDatabase<TDatabases>
     ///     Generates a <see cref="BDatabase{TDatabases}"/> instance that handles specific database connection
     ///     and configuration properties/methods. 
     /// </summary>
-    /// <param name="Sign">
+    /// <param name="sign">
     ///     Database implementation signature to identify.
     /// </param>
     /// <remarks> 
     ///     This method gathers the <see cref="Connection"/> options from ./<see cref="Sign"/>(Upper)>/*.json files automatically.
     /// </remarks>
-    public BDatabase([StringLength(5, MinimumLength = 5)] string Sign)
-        : base()
-    {
+    public BDatabase([StringLength(5, MinimumLength = 5)] string sign)
+        : base() {
 
-        this.Sign = Sign;
-        Connection = DatabaseUtilities.Retrieve(this.Sign);
+        Sign = sign;
+        Connection = DatabaseUtilities.Retrieve(Sign);
     }
 
     /// <summary>
     ///     Generates a <see cref="BDatabase{TDatabases}"/> instance that handles specific database connection
     ///     and configuration properties/methods. 
     /// </summary>
-    /// <param name="Sign">
+    /// <param name="sign">
     ///     Database implementation signature to identify.
     /// </param>
-    /// <param name="Connection">
+    /// <param name="connection">
     ///     Database connection options.
     /// </param>
-    public BDatabase([StringLength(5, MinimumLength = 5)] string Sign, ConnectionOptions Connection)
-        : base()
-    {
+    /// <param name="logsOn">
+    ///     Whether the logging service is enabled.
+    /// </param>
+    public BDatabase([StringLength(5, MinimumLength = 5)] string sign, ConnectionOptions connection, bool logsOn = true)
+        : base() {
 
-        this.Sign = Sign;
-        this.Connection = Connection;
+        Sign = sign;
+        Connection = connection;
+        LogsOn = logsOn;
     }
 
     /// <summary>
     ///     Generates a <see cref="BDatabase{TDatabases}"/> instance that handles specific database connection
     ///     and configuration properties/methods. 
     /// </summary>
-    /// <param name="Sign">
+    /// <param name="sign">
     ///     Database implementation signature to identify
     /// </param>
-    /// <param name="Options">
+    /// <param name="dbOptions">
     ///     Native EntityFrameworkCore <see cref="DbContext"/> implementation options.
     /// </param>
     /// <remarks> 
     ///     This method gathers the <see cref="Connection"/> options from ./<see cref="Sign"/>(Upper)>/*.json files automatically.
     /// </remarks>
-    public BDatabase([StringLength(5, MinimumLength = 5)] string Sign, DbContextOptions<TDatabases> Options)
-        : base(Options)
-    {
+    /// <param name="logsOn">
+    ///     Whether the logging service is enabled.
+    /// </param>
+    public BDatabase([StringLength(5, MinimumLength = 5)] string sign, DbContextOptions<TDatabases> dbOptions, bool logsOn = true)
+        : base(dbOptions) {
 
-        this.Sign = Sign;
-        Connection = DatabaseUtilities.Retrieve(this.Sign);
+        Sign = sign;
+        Connection = DatabaseUtilities.Retrieve(sign);
+        LogsOn = logsOn;
     }
 
     /// <summary>
     ///     Generates a <see cref="BDatabase{TDatabases}"/> instance that handles specific database connection
     ///     and configuration properties/methods. 
     /// </summary>
-    /// <param name="Sign">
+    /// <param name="sign">
     ///     Database implementation signature to identify
     /// </param>
-    /// <param name="Connection">
+    /// <param name="connection">
     ///     Database connection options.
     /// </param>
-    /// <param name="Options">
+    /// <param name="dbOptions">
     ///     Native EntityFrameworkCore <see cref="DbContext"/> implementation options.
     /// </param>
-    public BDatabase([StringLength(5, MinimumLength = 5)] string Sign, ConnectionOptions Connection, DbContextOptions<TDatabases> Options)
-        : base(Options)
-    {
+    /// <param name="logsOn">
+    ///     Whether the logging service is enabled.
+    /// </param>
+    public BDatabase([StringLength(5, MinimumLength = 5)] string sign, ConnectionOptions connection, DbContextOptions<TDatabases> dbOptions, bool logsOn = true)
+        : base(dbOptions) {
 
-        this.Sign = Sign;
-        this.Connection = Connection;
+        Sign = sign;
+        Connection = connection;
+        LogsOn = logsOn;
     }
 
     /// <summary>
@@ -129,24 +151,21 @@ public abstract partial class BDatabase<TDatabases>
     /// <returns>
     ///     The strict validated collection of [<see cref="BBusinessDatabaseEntity"/>]s and [<see cref="BConnector{TSource, TTarget}"/>]s.
     /// </returns>
-    BEntity[] ValidateSets()
-    {
+    BEntity[] ValidateSets() {
         Type databaseType = GetType();
 
         List<BEntity> sets = [];
         IEnumerable<PropertyInfo> dbSets = databaseType
            .GetProperties()
            .Where(
-               (propInfo) =>
-               {
+               (propInfo) => {
                    Type propType = propInfo.PropertyType;
 
                    return propType.IsGenericType && propType.GetGenericTypeDefinition() == typeof(DbSet<>);
                }
            );
 
-        foreach (PropertyInfo dbSet in dbSets)
-        {
+        foreach (PropertyInfo dbSet in dbSets) {
             Type generic = dbSet.PropertyType.GetGenericArguments()[0]
                 ?? throw new Exception($"DBSet [{dbSet.Name}] generic gathering failure");
 
@@ -156,11 +175,8 @@ public abstract partial class BDatabase<TDatabases>
         return [.. sets];
     }
 
-    /// <summary>
-    ///     Validates database connection health.
-    /// </summary>
-    public void ValidateConnection()
-    {
+
+    public void ValidateHealth() {
         Logger.Announce(
             $"Setting up ORM",
             new() {
@@ -169,25 +185,18 @@ public abstract partial class BDatabase<TDatabases>
             }
         );
 
-        if (Database.CanConnect())
-        {
+        if (Database.CanConnect()) {
             Logger.Success($"[{GetType().FullName}] ORM Set");
 
             IEnumerable<string> pendingMigrations = Database.GetPendingMigrations();
-            if (pendingMigrations.Any())
-            {
+            if (pendingMigrations.Any()) {
                 throw new Exception($"ORM ({GetType().FullName}) has pending migrations ({pendingMigrations.Count()})");
             }
             Evaluate();
-        }
-        else
-        {
-            try
-            {
+        } else {
+            try {
                 Database.OpenConnection();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 throw new Exception($"Invalid connection with Database ({GetType().FullName}) | {ex.InnerException?.Message}");
             }
         }
@@ -196,8 +205,7 @@ public abstract partial class BDatabase<TDatabases>
     /// <summary>
     ///     Evaluates if <see cref="Sets"/> are correctly configured and translated to the internal framework handler.
     /// </summary>
-    public void Evaluate()
-    {
+    public void Evaluate() {
         BEntity[] sets = ValidateSets();
 
         Logger.Announce(
@@ -208,11 +216,9 @@ public abstract partial class BDatabase<TDatabases>
         );
 
         Exception[] evResults = [];
-        foreach (BEntity set in sets)
-        {
+        foreach (BEntity set in sets) {
             Exception[] result = set.EvaluateDefinition();
-            if (result.Length > 0)
-            {
+            if (result.Length > 0) {
                 Logger.Warning(
                     "Wrong [Set] definition",
                     new() {
@@ -225,12 +231,9 @@ public abstract partial class BDatabase<TDatabases>
             evResults = [.. evResults, .. result];
         }
 
-        if (evResults.Length > 0)
-        {
+        if (evResults.Length > 0) {
             throw new Exception("Database [Set] definition failures");
-        }
-        else
-        {
+        } else {
             Logger.Success($"[{GetType().Name}] Set validation succeeded");
         }
     }
@@ -250,13 +253,11 @@ public abstract partial class BDatabase<TDatabases>
     /// <param name="optionsBuilder">
     ///     Relations builder proxy object.
     /// </param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         string connectionString = Connection.GenerateConnectionString();
         optionsBuilder.UseSqlServer(connectionString);
 
-        if (AppDomain.CurrentDomain.FriendlyName.Contains("ef"))
-        {
+        if (AppDomain.CurrentDomain.FriendlyName.Contains("ef")) {
             Logger.Warning(
                     $"Running EF Design Time Execution",
                     new Dictionary<string, object?> {
@@ -267,21 +268,17 @@ public abstract partial class BDatabase<TDatabases>
         }
     }
 
-    protected override void OnModelCreating(ModelBuilder mBuilder)
-    {
+    protected override void OnModelCreating(ModelBuilder mBuilder) {
 
         DefineSource(mBuilder);
 
         IEnumerable<IMutableEntityType> entityTypes = mBuilder.Model.GetEntityTypes();
-        foreach (IMutableEntityType entityType in entityTypes)
-        {
+        foreach (IMutableEntityType entityType in entityTypes) {
 
             IEnumerable<IMutableForeignKey> foreignKeys = [.. entityType.GetForeignKeys()];
-            foreach (IMutableForeignKey foreignKey in foreignKeys)
-            {
+            foreach (IMutableForeignKey foreignKey in foreignKeys) {
 
-                if (foreignKey.DependentToPrincipal is null)
-                {
+                if (foreignKey.DependentToPrincipal is null) {
                     continue;
                 }
 
@@ -291,18 +288,15 @@ public abstract partial class BDatabase<TDatabases>
 
         BEntity[] sets = ValidateSets();
 
-        foreach (BEntity set in sets)
-        {
+        foreach (BEntity set in sets) {
             Type setType = set.GetType();
             mBuilder.Entity(
                 setType,
-                (etBuilder) =>
-                {
+                (etBuilder) => {
                     etBuilder.HasKey(nameof(IEntity.Id));
                     etBuilder.Property<long>(nameof(IEntity.Id)).IsRequired();
 
-                    if (set is BNamedEntity)
-                    {
+                    if (set is BNamedEntity) {
                         PropertyInfo nameProperty = set.GetProperty(nameof(BNamedEntity.Name));
                         PropertyInfo descriptionProperty = set.GetProperty(nameof(BNamedEntity.Description));
 
@@ -331,8 +325,7 @@ public abstract partial class BDatabase<TDatabases>
 ///     [Abstract] Partial implementation to expose generation/validation methods to <see cref="BDatabase{TDatabases}"/> handler.
 /// </summary>
 public abstract partial class BEntity
-    : BObject<IEntity>, IEntity
-{
+    : BObject<IEntity>, IEntity {
 
     /// <summary>
     ///     Describe to the Entity Framework manager how to handle the [Entity] object, its proeprties and relations, instructing

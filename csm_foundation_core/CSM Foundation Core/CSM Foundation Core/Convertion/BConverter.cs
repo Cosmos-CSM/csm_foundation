@@ -1,8 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using CSM_Foundation.Convertion;
-
 namespace CSM_Foundation_Core.Convertion;
 
 /// <summary>

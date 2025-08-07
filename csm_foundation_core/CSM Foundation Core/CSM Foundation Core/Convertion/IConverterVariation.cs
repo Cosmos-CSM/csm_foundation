@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-using CSM_Foundation_Core.Convertion;
-
-namespace CSM_Foundation.Convertion;
+namespace CSM_Foundation_Core.Convertion;
 
 /// <summary>
 ///     Interface to determine a variation to the <see cref="BConverter{T}"/> implementation.
