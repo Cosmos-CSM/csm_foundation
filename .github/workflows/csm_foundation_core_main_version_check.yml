@@ -16,17 +16,24 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Define project path
+        id: config
+        run: |
+          echo "project_path=csm_foundation_core\CSM Foundation Core\CSM Foundation Core/CSM_Foundation_Core.csproj" >> $GITHUB_OUTPUT
+
       - name: Get version from PR branch
         id: pr_version
         run: |
-          VERSION_PR=$(grep -oPm1 "(?<=<Version>)[^<]+" "csm_foundation\csm_foundation_core\CSM Foundation Core\CSM Foundation Core\CSM Foundation Core.csproj")
+          PROJECT_PATH=${{ steps.config.outputs.project_path }}
+          VERSION_PR=$(grep -oPm1 "(?<=<Version>)[^<]+" "$PROJECT_PATH")
           echo "version_pr=$VERSION_PR" >> $GITHUB_OUTPUT
 
       - name: Get version from main branch
         id: main_version
         run: |
+          PROJECT_PATH=${{ steps.config.outputs.project_path }}
           git fetch origin main
-          VERSION_MAIN=$(git show origin/main:"csm_foundation\csm_foundation_core\CSM Foundation Core\CSM Foundation Core\CSM Foundation Core.csproj" | grep -oPm1 "(?<=<Version>)[^<]+")
+          VERSION_MAIN=$(git show origin/main:"$PROJECT_PATH" | grep -oPm1 "(?<=<Version>)[^<]+")
           echo "version_main=$VERSION_MAIN" >> $GITHUB_OUTPUT
 
       - name: Compare versions
