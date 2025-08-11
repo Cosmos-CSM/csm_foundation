@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'csm_foundation/csm_foundation_core/CSM Foundation Core/**'
+      - 'csm_foundation_core/**'
 
 permissions:
   contents: read
