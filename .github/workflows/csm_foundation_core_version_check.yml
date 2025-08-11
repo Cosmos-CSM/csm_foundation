@@ -21,7 +21,7 @@ jobs:
       - name: Define project path
         id: config
         run: |
-          echo 'project_path="csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM_Foundation_Core.csproj"' >> $GITHUB_OUTPUT
+          echo 'project_path="csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj"' >> $GITHUB_OUTPUT
 
       - name: Get version from PR branch
         id: pr_version
