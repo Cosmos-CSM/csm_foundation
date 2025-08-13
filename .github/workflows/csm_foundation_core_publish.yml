@@ -29,7 +29,7 @@ jobs:
       - name: 📦 Pack NuGet project
         run: |
           dotnet pack \
-            "csm_foundation_core/CSM Foundation Core/CSM Foundation Core.csproj" \
+            "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj" \
             --configuration Release \
             --output ./nupkgs
 
