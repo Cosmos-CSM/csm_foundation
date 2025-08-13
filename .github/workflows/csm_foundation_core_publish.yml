@@ -1,4 +1,4 @@
-name: Publish (CSM Foundation Core) Package
+name: [CSM Foundation Core] Publish Workflow
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   packages: write
 
 jobs:
-  publish:
+  csm_foundation_core_publish:
     if: github.event.head_commit.message != 'Initial commit'
     runs-on: ubuntu-latest
 
@@ -28,7 +28,7 @@ jobs:
       - name: 📦 Pack NuGet project
         run: |
           dotnet pack \
-            "csm_foundation/csm_foundation_core/CSM Foundation Core/CSM Foundation Core.csproj" \
+            "csm_foundation_core/CSM Foundation Core/CSM Foundation Core.csproj" \
             --configuration Release \
             --output ./nupkgs
 
