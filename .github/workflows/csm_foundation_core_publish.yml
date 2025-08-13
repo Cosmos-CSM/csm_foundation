@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   csm_foundation_core_publish:
-    if: github.event.head_commit.message != 'Initial commit'
     runs-on: ubuntu-latest
 
     steps:
@@ -26,10 +25,15 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: 🔧 Restore & Build
+        run: |
+          dotnet restore "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj"
+          dotnet build   "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj" \
+            --configuration Release
+
       - name: 📦 Pack NuGet project
         run: |
-          dotnet pack \
-            "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj" \
+          dotnet pack "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj" \
             --configuration Release \
             --output ./nupkgs
 
