@@ -1,4 +1,4 @@
-name: [CSM Foundation Core] Publish Workflow
+name: CSM Foundation Core Publish Workflow
 
 on:
   workflow_dispatch:
