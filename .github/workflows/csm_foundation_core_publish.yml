@@ -2,15 +2,6 @@ name: CSM Foundation Core Publish Workflow
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'staging'
-      logLevel:
-        description: 'Log level'
-        required: false
-        default: 'info'
   push:
     branches:
       - main
