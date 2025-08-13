@@ -36,11 +36,12 @@ jobs:
           dotnet pack "csm_foundation_core/CSM Foundation Core/CSM Foundation Core/CSM Foundation Core.csproj" \
             --configuration Release \
             --output ./nupkgs
-
+  
       - name: 📤 Push to GitHub Packages
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.PUBLISH_PAT }}
         run: |
-          dotnet nuget push ./nupkgs/*.nupkg \
+          dotnet nuget push "./nupkgs/*.nupkg" \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --api-key $NUGET_AUTH_TOKEN \
             --skip-duplicate
